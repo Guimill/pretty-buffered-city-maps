@@ -12,11 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+#https://simplemaps.com/data/world-cities
+
 import streamlit as st
 from streamlit.logger import get_logger
+import streamlit_folium as stf
+import pandas as pd
+import re
 
 LOGGER = get_logger(__name__)
 
+Cities = pd.read_csv('data/worldcities.csv')
+def remove_special_chars(city):
+    pattern = r'[^\w\s]'
+    return re.sub(pattern, '', city)
+
+Cities['city'] = Cities['city'].apply(remove_special_chars)
+Cities['city'] = Cities['city'].str.lower()
 
 def run():
     st.set_page_config(
@@ -24,27 +37,37 @@ def run():
         page_icon="👋",
     )
 
-    st.write("# Welcome to Streamlit! 👋")
+    st.write("# Welcome to Paris!")
 
-    st.sidebar.success("Select a demo above.")
+    st.markdown(""" For cities with a name containing special characters, just write them as glued.
+                
+                example : Aix-en-Provence -> aixenprovence
+                """)
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+    citie_selector = st.text_input('Name a city !', 'Paris')
+    citie_selector = str.lower(citie_selector)
+
+    city_lat = Cities.loc[Cities['city'] == citie_selector, 'lat'].iloc[0]
+    city_lng = Cities.loc[Cities['city'] == citie_selector, 'lng'].iloc[0]
+
+
+
+    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=9)
+
+    radius = 100
+    stf.folium.CircleMarker(
+        location=[city_lat, city_lng],
+        radius=radius,
+        color="cornflowerblue",
+        stroke=False,
+        fill=True,
+        fill_opacity=0.6,
+        opacity=1,
+        popup="{} pixels".format(radius),
+        tooltip="I am in pixels",
+    ).add_to(m)
+
+    stf.folium_static(m)
 
 
 if __name__ == "__main__":
