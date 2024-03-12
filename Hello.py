@@ -22,89 +22,41 @@ import pandas as pd
 import re
 import requests
 import json
+import osmnx as ox
 
 LOGGER = get_logger(__name__)
-
-Cities = pd.read_csv('data/worldcities.csv')
-def remove_special_chars(city):
-    pattern = r'[^\w\s]'
-    return re.sub(pattern, '', city)
-
-Cities['city'] = Cities['city'].apply(remove_special_chars)
-Cities['city'] = Cities['city'].str.lower()
-
-overpass_url = "https://overpass-api.de/api/"
 
 def run():
     st.set_page_config(
         page_title="Hello",
         page_icon="👋",
     )
+    st.title('Paris River Lines and Wetlands Map')
 
-    st.write("# Welcome to Paris!")
+    # Specify the location (Paris) and the feature types (rivers and wetlands)
+    location = "Paris, France"
+    feature_types = ["river", "wetland"]
 
-    st.markdown(""" For cities with a name containing special characters, just write them as glued.
-                
-                example : Aix-en-Provence -> aixenprovence
-                """)
+    # Retrieve river lines and wetlands data using osmnx
+    data = ox.geometries_from_place(location, tags={'waterway': '|'.join(feature_types)})
 
-    citie_selector = st.text_input('Name a city !', 'Paris')
-    citie_selector = str.lower(citie_selector)
-    city_lat = Cities.loc[Cities['city'] == citie_selector, 'lat'].iloc[0]
-    city_lng = Cities.loc[Cities['city'] == citie_selector, 'lng'].iloc[0]
+    # Create a Folium map centered on Paris with Stamen Toner background
+    m = stf.folium.Map(location=[48.8566, 2.3522], zoom_start=12, tiles='Stamen Toner')
 
-    radius = 0.01  # 1 degree is approximately 111 kilometers
+    # Add river lines and wetlands to the map
+    for index, row in data.iterrows():
+        if row.geometry.type == 'LineString':
+            stf.folium.PolyLine(locations=row.geometry.coords, color='blue').add_to(m)
+        elif row.geometry.type == 'Polygon':
+            stf.folium.Polygon(locations=row.geometry.exterior.coords, color='green', fill=True, fill_color='green').add_to(m)
 
-    # Calculate bounding box coordinates
-    min_lat = city_lat - radius
-    max_lat = city_lat + radius
-    min_lng = city_lng - radius
-    max_lng = city_lng + radius
+    # Add a circular crop with radius 100 pixels
+    crop_center = [48.8566, 2.3522]  # Center of Paris
+    crop_radius = 100  # Radius in pixels
+    stf.folium.CircleMarker(location=crop_center, radius=crop_radius, color='black', fill=True, fill_opacity=0.5).add_to(m)
 
-    # Bounding box format: (min_lat, min_lng, max_lat, max_lng)
-    bbox = (min_lat, min_lng, max_lat, max_lng)
-
-    overpass_query = f"""
-        [out:json];
-        (
-        way["highway"="cycleway"]({bbox});
-        way["highway"="primary"]({bbox});
-        way["highway"="motorway"]({bbox});
-        way["building"="historic"]({bbox});
-        way["waterway"="river"]({bbox});
-        way["natural"="wetland"]({bbox});
-        way["natural"="water"]({bbox});
-        relation["waterway"="river"]({bbox});
-        relation["natural"="wetland"]({bbox});
-        relation["natural"="water"]({bbox});
-        );
-        (._;);
-        out geom;
-        >;
-        out skel qt;
-    """
-
-    response = requests.get(overpass_url, params={'data': overpass_query})
-
-    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=15)
-
-    radius = 50
-    stf.folium.CircleMarker(
-        location=[city_lat, city_lng],
-        radius=radius,
-        color="cornflowerblue",
-        stroke=False,
-        fill=True,
-        fill_opacity=0.6,
-        opacity=1,
-        popup="{} pixels".format(radius),
-        tooltip="I am in pixels",
-        ).add_to(m)
-
+    # Display the map using Streamlit
     stf.folium_static(m)
-
 
 if __name__ == "__main__":
     run()
-
-
