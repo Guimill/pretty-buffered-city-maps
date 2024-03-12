@@ -13,15 +13,11 @@
 # limitations under the License.
 
 
-#https://simplemaps.com/data/world-cities
+# https://simplemaps.com/data/world-cities
 
 import streamlit as st
 from streamlit.logger import get_logger
 import streamlit_folium as stf
-import pandas as pd
-import re
-import requests
-import json
 import osmnx as ox
 
 LOGGER = get_logger(__name__)
@@ -31,31 +27,24 @@ def run():
         page_title="Hello",
         page_icon="👋",
     )
-    st.title('Paris River Lines and Wetlands Map')
 
-    # Specify the location (Paris) and the feature types (rivers and wetlands)
-    location = "Paris, France"
-    feature_types = ["river", "wetland"]
+    st.title('Paris')
 
-    # Retrieve river lines and wetlands data using osmnx
-    data = ox.geometries_from_place(location, tags={'waterway': '|'.join(feature_types)})
+    # Define a smaller bounding box for Paris
+    bbox = (48.9, 2.3, 48.8, 2.4)  # Example smaller bounding box coordinates
+
+    # Fetch waterway features within the bounding box using osmnx
+    waterway_data = ox.features_from_bbox(*bbox, tags={'waterway': True})
 
     # Create a Folium map centered on Paris with Stamen Toner background
     m = stf.folium.Map(location=[48.8566, 2.3522], zoom_start=12, tiles='Stamen Toner')
 
-    # Add river lines and wetlands to the map
-    for index, row in data.iterrows():
-        if row.geometry.type == 'LineString':
-            stf.folium.PolyLine(locations=row.geometry.coords, color='blue').add_to(m)
-        elif row.geometry.type == 'Polygon':
-            stf.folium.Polygon(locations=row.geometry.exterior.coords, color='green', fill=True, fill_color='green').add_to(m)
+    # Add waterway features from osmnx to the map
+    for index, row in waterway_data.iterrows():
+        if row.geometry.geom_type == 'LineString':
+            stf.folium.PolyLine(locations=row.geometry.coords, color='red').add_to(m)
 
-    # Add a circular crop with radius 100 pixels
-    crop_center = [48.8566, 2.3522]  # Center of Paris
-    crop_radius = 100  # Radius in pixels
-    stf.folium.CircleMarker(location=crop_center, radius=crop_radius, color='black', fill=True, fill_opacity=0.5).add_to(m)
-
-    # Display the map using Streamlit
+    # Display the map
     stf.folium_static(m)
 
 if __name__ == "__main__":
