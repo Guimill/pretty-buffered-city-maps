@@ -34,7 +34,7 @@ def run():
     bbox = (48.9, 2.3, 48.8, 2.4)  # Example smaller bounding box coordinates
 
     # Fetch waterway features within the bounding box using osmnx
-    waterway_data = ox.features_from_bbox(*bbox, tags={'waterway': True})
+    waterway_data = ox.geometries_from_bbox(bbox[0], bbox[1], bbox[2], bbox[3], tags={'waterway': True})
 
     # Create a Folium map centered on Paris with Stamen Toner background
     m = stf.folium.Map(location=[48.8566, 2.3522], zoom_start=12, tiles='Stamen Toner')
