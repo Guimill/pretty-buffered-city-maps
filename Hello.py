@@ -44,30 +44,21 @@ def run():
     # Bounding box format: (min_lat, min_lng, max_lat, max_lng)
     bbox = (min_lat, min_lng, max_lat, max_lng)
 
+    overpass_url = "http://overpass-api.de/api/interpreter"  # Replace with the appropriate Overpass API endpoint
+
     overpass_query = f"""
         [out:json];
         (
-        way["highway"="cycleway"]({bbox});
-        way["highway"="primary"]({bbox});
-        way["highway"="motorway"]({bbox});
-        way["building"="historic"]({bbox});
-        way["waterway"="river"]({bbox});
-        way["natural"="wetland"]({bbox});
-        way["natural"="water"]({bbox});
-        relation["waterway"="river"]({bbox});
-        relation["natural"="wetland"]({bbox});
-        relation["natural"="water"]({bbox});
+        relation["waterway"="river"](48.8156,2.2241,48.9021,2.4699);
+        relation["highway"="primary"](48.8156,2.2241,48.9021,2.4699);
         );
-        (._;);
         out geom;
-        >;
-        out skel qt;
     """
 
     response = requests.get(overpass_url, params={'data': overpass_query})
-    st.write(response.json)
+    data = response.json()
 
-    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=15)
+    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10)
 
     radius = 50
     stf.folium.CircleMarker(
@@ -81,6 +72,14 @@ def run():
         popup="{} pixels".format(radius),
         tooltip="I am in pixels",
         ).add_to(m)
+
+    if 'elements' in data:
+            for element in data['elements']:
+                if 'geometry' in element:
+                    if 'type' in element['geometry'] and element['geometry']['type'] == 'LineString':
+                        coordinates = element['geometry']['coordinates']
+                        stf.folium.PolyLine(locations=coordinates, color='red').add_to(m)
+
 
     stf.folium_static(m)
 
