@@ -1,7 +1,6 @@
 import streamlit as st
 from streamlit.logger import get_logger
 import streamlit_folium as stf
-import osmnx as ox
 import re, requests
 import pandas as pd
 
@@ -49,14 +48,19 @@ def run():
     overpass_query = f"""
         [out:json];
         (
-        relation["waterway"="river"](48.8156,2.2241,48.9021,2.4699);
-        relation["highway"="primary"](48.8156,2.2241,48.9021,2.4699);
+        relation["waterway"="river"](around:10000, {city_lat}, {city_lng});
+        relation["highway"="primary"](around:10, {city_lat}, {city_lng});
         );
         out geom;
     """
 
     response = requests.get(overpass_url, params={'data': overpass_query})
-    data = response.json()
+    if response.status_code == 200:
+        data = response.json()
+        st.write("Data retrieved successfully!")
+    else:
+        st.write("Failed to retrieve data. Status code:", response.status_code)
+        st.write(response.text)  # Print the response content for further inspection
 
     m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10)
 
@@ -73,12 +77,14 @@ def run():
         tooltip="I am in pixels",
         ).add_to(m)
 
+
     if 'elements' in data:
-            for element in data['elements']:
-                if 'geometry' in element:
-                    if 'type' in element['geometry'] and element['geometry']['type'] == 'LineString':
-                        coordinates = element['geometry']['coordinates']
-                        stf.folium.PolyLine(locations=coordinates, color='red').add_to(m)
+        for element in data['elements']:
+            if 'type' in element and element['type'] == 'relation':
+                for member in element.get('members', []):
+                    if member.get('type') == 'way' and member.get('role') == 'main_stream' and 'geometry' in member:
+                        coordinates = [(node['lat'], node['lon']) for node in member['geometry']]
+                        stf.folium.PolyLine(locations=coordinates, color='blue').add_to(m)
 
 
     stf.folium_static(m)
