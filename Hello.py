@@ -48,8 +48,11 @@ def run():
     overpass_query = f"""
         [out:json];
         (
+        way["highway"="trunk"](around:20000, {city_lat}, {city_lng});
+        way["highway"="motorway"](around:20000, {city_lat}, {city_lng});
         relation["waterway"="river"](around:10000, {city_lat}, {city_lng});
-        relation["highway"="primary"](around:10, {city_lat}, {city_lng});
+        way["natural"="tree_row"](around:10000, {city_lat}, {city_lng});
+        way["natural"="coastline"](around:20000, {city_lat}, {city_lng});
         );
         out geom;
     """
@@ -64,27 +67,40 @@ def run():
 
     m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10)
 
-    radius = 50
+    radius = 5000
     stf.folium.CircleMarker(
         location=[city_lat, city_lng],
         radius=radius,
-        color="cornflowerblue",
+        color="black",
         stroke=False,
         fill=True,
-        fill_opacity=0.6,
-        opacity=1,
-        popup="{} pixels".format(radius),
-        tooltip="I am in pixels",
+        fill_opacity=1,
         ).add_to(m)
 
 
     if 'elements' in data:
         for element in data['elements']:
-            if 'type' in element and element['type'] == 'relation':
-                for member in element.get('members', []):
-                    if member.get('type') == 'way' and member.get('role') == 'main_stream' and 'geometry' in member:
+            if element['type'] == 'relation' and 'members' in element:
+                # Process river lines
+                for member in element['members']:
+                    if member['type'] == 'way' and 'geometry' in member:
                         coordinates = [(node['lat'], node['lon']) for node in member['geometry']]
-                        stf.folium.PolyLine(locations=coordinates, color='blue').add_to(m)
+                        stf.folium.PolyLine(locations=coordinates, color='cyan').add_to(m)
+            if element['type'] == 'way' and 'tags' in element and element['tags'].get('highway') == 'trunk':
+                # Process primary highways
+                if 'geometry' in element:
+                    coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
+                    stf.folium.PolyLine(locations=coordinates, color='gold').add_to(m)
+            if element['type'] == 'way' and 'tags' in element and element['tags'].get('highway') == 'motorway':
+                # Process primary highways
+                if 'geometry' in element:
+                    coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
+                    stf.folium.PolyLine(locations=coordinates, color='gold').add_to(m)
+            if element['type'] == 'way' and 'tags' in element and element['tags'].get('natural') == 'coastline':
+                # Process primary highways
+                if 'geometry' in element:
+                    coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
+                    stf.folium.PolyLine(locations=coordinates, color='silver').add_to(m)
 
 
     stf.folium_static(m)
