@@ -48,61 +48,81 @@ def run():
     overpass_query = f"""
         [out:json];
         (
-        way["highway"="trunk"](around:20000, {city_lat}, {city_lng});
-        way["highway"="motorway"](around:20000, {city_lat}, {city_lng});
-        relation["waterway"="river"](around:10000, {city_lat}, {city_lng});
+        way["highway"="trunk"](around:30000, {city_lat}, {city_lng});
+        way["highway"="motorway"](around:30000, {city_lat}, {city_lng});
+        way["highway"="primary"](around:30000, {city_lat}, {city_lng});
+        way["waterway"="river"](around:20000, {city_lat}, {city_lng});
         way["natural"="tree_row"](around:10000, {city_lat}, {city_lng});
-        way["natural"="coastline"](around:20000, {city_lat}, {city_lng});
+        way["natural"="coastline"](around:100000, {city_lat}, {city_lng});
         );
         out geom;
     """
 
     response = requests.get(overpass_url, params={'data': overpass_query})
-    if response.status_code == 200:
-        data = response.json()
-        st.write("Data retrieved successfully!")
-    else:
-        st.write("Failed to retrieve data. Status code:", response.status_code)
-        st.write(response.text)  # Print the response content for further inspection
+    data = response.json()
 
     m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10)
 
-    radius = 5000
+    radius = 500
     stf.folium.CircleMarker(
         location=[city_lat, city_lng],
         radius=radius,
-        color="black",
+        color="white",
         stroke=False,
         fill=True,
         fill_opacity=1,
         ).add_to(m)
 
 
-    if 'elements' in data:
-        for element in data['elements']:
-            if element['type'] == 'relation' and 'members' in element:
-                # Process river lines
-                for member in element['members']:
-                    if member['type'] == 'way' and 'geometry' in member:
-                        coordinates = [(node['lat'], node['lon']) for node in member['geometry']]
-                        stf.folium.PolyLine(locations=coordinates, color='cyan').add_to(m)
-            if element['type'] == 'way' and 'tags' in element and element['tags'].get('highway') == 'trunk':
-                # Process primary highways
-                if 'geometry' in element:
-                    coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
-                    stf.folium.PolyLine(locations=coordinates, color='gold').add_to(m)
-            if element['type'] == 'way' and 'tags' in element and element['tags'].get('highway') == 'motorway':
-                # Process primary highways
-                if 'geometry' in element:
-                    coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
-                    stf.folium.PolyLine(locations=coordinates, color='gold').add_to(m)
-            if element['type'] == 'way' and 'tags' in element and element['tags'].get('natural') == 'coastline':
-                # Process primary highways
-                if 'geometry' in element:
-                    coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
-                    stf.folium.PolyLine(locations=coordinates, color='silver').add_to(m)
+    stf.folium.CircleMarker(
+        location=[city_lat, city_lng],
+        radius=radius - 250,
+        color="#0e1117",
+        stroke=False,
+        fill=True,
+        fill_opacity=1,
+        ).add_to(m)
+
+# Create columns for checkboxes and color pickers
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        waterways_color = st.color_picker("", "#00ffff", key='waterways')
+        waterways_on = st.checkbox("Cours d'eaux", value=True)
+    with col2:
+        coastline_color = st.color_picker("", "#c0c0c0", key='coastline')
+        coastline_on = st.checkbox("Côtes", value=True)
+    with col3:
+        roads_color = st.color_picker("", "#ffd700", key='trunk')
+        trunk_on = st.checkbox("Tronçons", value=True)
+        motorway_on = st.checkbox("Autoroutes")
+        primary_on = st.checkbox("Boulevards")
+    with col4:
+        tree_color = st.color_picker("", "#00a67d", key='tree')
+        tree_on = st.checkbox("Haies")
 
 
+
+    for element in data['elements']:
+        if 'geometry' in element:
+            coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
+            highway_type = element['tags'].get('highway')
+            natural_type = element['tags'].get('natural')
+            waterway_type = element['tags'].get('waterway')
+
+            if waterways_on and waterway_type == 'river':
+                stf.folium.PolyLine(locations=coordinates, color=waterways_color).add_to(m)
+            elif trunk_on and highway_type == 'trunk':
+                stf.folium.PolyLine(locations=coordinates, color=roads_color).add_to(m)
+            elif motorway_on and highway_type == 'motorway':
+                stf.folium.PolyLine(locations=coordinates, color=roads_color).add_to(m)
+            elif primary_on and highway_type == 'primary':
+                stf.folium.PolyLine(locations=coordinates, color=roads_color).add_to(m)
+            elif coastline_on and natural_type == 'coastline':
+                stf.folium.PolyLine(locations=coordinates, color=coastline_color).add_to(m)
+            elif tree_on and natural_type == 'tree_row':
+                stf.folium.PolyLine(locations=coordinates, color=tree_color).add_to(m)
+
+    # Render the folium map in Streamlit
     stf.folium_static(m)
 
 
