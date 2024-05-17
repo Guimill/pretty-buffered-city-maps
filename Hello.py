@@ -1,8 +1,10 @@
 import streamlit as st
-from streamlit.logger import get_logger
-import streamlit_folium as stf
+import folium
+from streamlit_folium import st_folium
 import re, requests
 import pandas as pd
+import io
+from PIL import Image
 
 #### Languages ####
 
@@ -80,6 +82,7 @@ Littoral_Dictionnary = {
 
 
 Cities = pd.read_csv('data/worldcities.csv')
+
 def remove_special_chars(city):
     pattern = r'[^\w\s]'
     return re.sub(pattern, '', city)
@@ -219,14 +222,11 @@ def run():
                 stf.folium.PolyLine(locations=coordinates, color=tree_color).add_to(m)
 
 
-    stf.folium_static(m,width=700, height=500)
+    stf.folium_static(m)
     
-    map_file = "map.html"
-    m.save(map_file)
-
-    # Read the HTML file content
-    with open(map_file, "r") as file:
-        map_html = file.read()
+    img_data = m._to_png(5)
+    img = Image.open(io.BytesIO(img_data))
+    img.save('image.png')
 
     st.text("")
     st.text("")
@@ -237,12 +237,7 @@ def run():
     with col_ddl_1:
         st.text("")
     with col_ddl_2:
-        st.download_button(
-            label="Download map",
-            data=map_html,
-            file_name=map_file,
-            mime="text/html"
-        )
+        st.download_button(label="Download Map as PNG", data=img_data, file_name="map.png", mime="image/png")
     with col_ddl_3:
         st.text("")
     
