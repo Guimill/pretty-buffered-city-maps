@@ -103,7 +103,7 @@ def run():
     with col_language_3:
         st.text("")
     with col_language_4:
-        Language_option = st.selectbox("",("English", "French", "Chinese","Italian","Spanish","Breton"))
+        Language_option = st.selectbox("",("French", "English", "Chinese","Italian","Spanish","Breton"))
 
     st.write("# Beautiful Map Designer !")
 
