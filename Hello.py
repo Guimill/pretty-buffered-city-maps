@@ -4,6 +4,81 @@ import streamlit_folium as stf
 import re, requests
 import pandas as pd
 
+#### Languages ####
+
+Exemple_Dictionnary = {
+    "French"  : "Pour les villes avec un nom contenant des charactères spéciaux, concatenez les noms",
+    "English" : "For cities with a name containing special characters, just write them as glued",
+    "Chinese" : "",
+    "Italian" : "Per le città con un nuome contenente caratteri speciali, scrivetele attacato",
+    "Spanish" : "Por ciudad con un llama ...",
+    "Breton"  : ""
+}
+
+Ville_Dictionnary = {
+    "French"  : "Nommez une ville",
+    "English" : "Name a city",
+    "Chinese" : "命名一个城市",
+    "Italian" : "Chiamare una città",
+    "Spanish" : "Llamar una ciudad",
+    "Breton"  : ""
+}
+
+Tronçons_Dictionnary = {
+    "French"  : "Tronçons",
+    "English" : "Trunk",
+    "Chinese" : "公路路段",
+    "Italian" : "Tratti autostrade",
+    "Spanish" : "",
+    "Breton"  : ""
+}
+
+Autoroutes_Dictionnary = {
+    "French"  : "Autoroutes",
+    "English" : "Motorways",
+    "Chinese" : "高速公路",
+    "Italian" : "Autostrade",
+    "Spanish" : "",
+    "Breton"  : ""
+}
+
+Boulevards_Dictionnary = {
+    "French"  : "Boulevards",
+    "English" : "Boulevards",
+    "Chinese" : "林荫大道",
+    "Italian" : "Viali",
+    "Spanish" : "",
+    "Breton"  : ""
+}
+
+Haies_Dictionnary = {
+    "French"  : "Haies",
+    "English" : "Tree rows",
+    "Chinese" : "树篱",
+    "Italian" : "Ostacoli",
+    "Spanish" : "",
+    "Breton"  : ""
+}
+
+Cours_d_eaux_Dictionnary = {
+    "French"  : "Cours d'eau",
+    "English" : "Rivers",
+    "Chinese" : "川",
+    "Italian" : "Fiumi",
+    "Spanish" : "",
+    "Breton"  : ""
+}
+
+Littoral_Dictionnary = {
+    "French"  : "Littoral",
+    "English" : "Coastlines",
+    "Chinese" : "",
+    "Italian" : "",
+    "Spanish" : "",
+    "Breton"  : ""
+}
+
+
 Cities = pd.read_csv('data/worldcities.csv')
 def remove_special_chars(city):
     pattern = r'[^\w\s]'
@@ -20,14 +95,16 @@ def run():
         page_icon="👋",
     )
 
-    st.write("# Welcome to Paris!")
+    Language_option = st.selectbox("Languages :",("English", "French", "Chinese","Italian","Spanish","Breton"))
 
-    st.markdown(""" For cities with a name containing special characters, just write them as glued.
+    st.write("# Beautiful Map Designer !")
+
+    st.markdown(f""" {Exemple_Dictionnary[Language_option]}.
                 
                 example : Aix-en-Provence -> aixenprovence
                 """)
 
-    citie_selector = st.text_input('Name a city !', 'Paris')
+    citie_selector = st.text_input(f'{Ville_Dictionnary[Language_option]}', 'Paris')
     citie_selector = str.lower(citie_selector)
     city_lat = Cities.loc[Cities['city'] == citie_selector, 'lat'].iloc[0]
     city_lng = Cities.loc[Cities['city'] == citie_selector, 'lng'].iloc[0]
@@ -48,11 +125,11 @@ def run():
     overpass_query = f"""
         [out:json];
         (
-        way["highway"="trunk"](around:30000, {city_lat}, {city_lng});
-        way["highway"="motorway"](around:30000, {city_lat}, {city_lng});
-        way["highway"="primary"](around:30000, {city_lat}, {city_lng});
+        way["highway"="trunk"](around:50000, {city_lat}, {city_lng});
+        way["highway"="motorway"](around:50000, {city_lat}, {city_lng});
+        way["highway"="primary"](around:20000, {city_lat}, {city_lng});
         way["waterway"="river"](around:20000, {city_lat}, {city_lng});
-        way["natural"="tree_row"](around:10000, {city_lat}, {city_lng});
+        way["natural"="tree_row"](around:30000, {city_lat}, {city_lng});
         way["natural"="coastline"](around:100000, {city_lat}, {city_lng});
         );
         out geom;
@@ -61,7 +138,9 @@ def run():
     response = requests.get(overpass_url, params={'data': overpass_query})
     data = response.json()
 
-    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10)
+    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10, no_touch=True)
+
+    
 
     radius = 500
     stf.folium.CircleMarker(
@@ -87,18 +166,18 @@ def run():
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         waterways_color = st.color_picker("", "#00ffff", key='waterways')
-        waterways_on = st.checkbox("Cours d'eaux", value=True)
+        waterways_on = st.checkbox(Cours_d_eaux_Dictionnary[Language_option], value=True)
     with col2:
         coastline_color = st.color_picker("", "#c0c0c0", key='coastline')
-        coastline_on = st.checkbox("Côtes", value=True)
+        coastline_on = st.checkbox(Littoral_Dictionnary[Language_option], value=True)
     with col3:
         roads_color = st.color_picker("", "#ffd700", key='trunk')
-        trunk_on = st.checkbox("Tronçons", value=True)
-        motorway_on = st.checkbox("Autoroutes")
-        primary_on = st.checkbox("Boulevards")
+        trunk_on = st.checkbox(Tronçons_Dictionnary[Language_option], value=True)
+        motorway_on = st.checkbox(Autoroutes_Dictionnary[Language_option])
+        primary_on = st.checkbox(Boulevards_Dictionnary[Language_option])
     with col4:
         tree_color = st.color_picker("", "#00a67d", key='tree')
-        tree_on = st.checkbox("Haies")
+        tree_on = st.checkbox(Haies_Dictionnary[Language_option])
 
 
 
