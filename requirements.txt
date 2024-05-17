@@ -5,3 +5,4 @@ pydeck
 streamlit
 streamlit-folium
 osmnx
+selenium
