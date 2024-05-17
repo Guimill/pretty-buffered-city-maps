@@ -219,8 +219,8 @@ def run():
                 stf.folium.PolyLine(locations=coordinates, color=tree_color).add_to(m)
 
 
-    stf.folium_static(m)
-
+    stf.folium_static(m,width=700, height=500)
+    
     map_file = "map.html"
     m.save(map_file)
 
