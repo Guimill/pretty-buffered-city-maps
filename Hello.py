@@ -224,7 +224,7 @@ def run():
 
     stf.folium_static(m)
     
-    img_data = m._to_png(5)
+    img_data = m._to_png(10)
     img = Image.open(io.BytesIO(img_data))
     img.save('image.png')
 
