@@ -80,3 +80,14 @@ def run():
 
 if __name__ == "__main__":
     run()
+
+
+        overpass_query = f"""
+        [out:json];
+        (
+        relation["boundary"="administrative"]["admin_level"="7"](around:10000, {city_lat}, {city_lng});
+        way["highway"="primary"](around:20000, {city_lat}, {city_lng});
+        relation["waterway"="river"](around:10000, {city_lat}, {city_lng});
+        );
+        out geom;
+    """
