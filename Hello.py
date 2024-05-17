@@ -221,6 +221,21 @@ def run():
 
     stf.folium_static(m)
 
+    map_file = "map.html"
+    m.save(map_file)
+
+    # Read the HTML file content
+    with open(map_file, "r") as file:
+        map_html = file.read()
+
+    # Create a download button
+    st.download_button(
+        label="Download map",
+        data=map_html,
+        file_name=map_file,
+        mime="text/html"
+    )
+
     st.text("")
     st.text("")
     st.text("")
