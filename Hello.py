@@ -228,19 +228,24 @@ def run():
     with open(map_file, "r") as file:
         map_html = file.read()
 
-    # Create a download button
-    st.download_button(
-        label="Download map",
-        data=map_html,
-        file_name=map_file,
-        mime="text/html"
-    )
-
     st.text("")
     st.text("")
     st.text("")
     st.text("")
 
+    col_ddl_1, col_ddl_2, col_ddl_3 = st.columns([0.1, 0.8, 0.1])
+    with col_ddl_1:
+        st.text("")
+    with col_ddl_2:
+        st.download_button(
+            label="Download map",
+            data=map_html,
+            file_name=map_file,
+            mime="text/html"
+        )
+    with col_ddl_3:
+        st.text("")
+    
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
         st.text("")
