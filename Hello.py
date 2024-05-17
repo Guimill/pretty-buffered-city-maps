@@ -1,10 +1,8 @@
 import streamlit as st
-import folium
-from streamlit_folium import stf
+from streamlit.logger import get_logger
+import streamlit_folium as stf
 import re, requests
 import pandas as pd
-import io
-from PIL import Image
 
 #### Languages ####
 
@@ -223,23 +221,11 @@ def run():
 
 
     stf.folium_static(m)
-    
-    img_data = m._to_png(10)
-    img = Image.open(io.BytesIO(img_data))
-    img.save('image.png')
 
     st.text("")
     st.text("")
     st.text("")
     st.text("")
-
-    col_ddl_1, col_ddl_2, col_ddl_3 = st.columns([0.1, 0.8, 0.1])
-    with col_ddl_1:
-        st.text("")
-    with col_ddl_2:
-        st.download_button(label="Download Map as PNG", data=img_data, file_name="map.png", mime="image/png")
-    with col_ddl_3:
-        st.text("")
     
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
