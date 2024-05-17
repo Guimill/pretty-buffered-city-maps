@@ -95,7 +95,15 @@ def run():
         page_icon="👋",
     )
 
-    Language_option = st.selectbox("",("English", "French", "Chinese","Italian","Spanish","Breton"))
+    col_language_1, col_language_2, col_language_3, col_language_4 = st.columns(4)
+    with col_language_1:
+        st.text("")
+    with col_language_2:
+        st.text("")
+    with col_language_3:
+        st.text("")
+    with col_language_4:
+        Language_option = st.selectbox("",("English", "French", "Chinese","Italian","Spanish","Breton"))
 
     st.write("# Beautiful Map Designer !")
 
@@ -104,7 +112,7 @@ def run():
                 Aix-en-Provence -> aixenprovence
                 """)
 
-    citie_selector = st.text_input(f'{Ville_Dictionnary[Language_option]}', 'Paris')
+    citie_selector = st.text_input(f'{Ville_Dictionnary[Language_option]}', 'Angers')
     citie_selector = str.lower(citie_selector)
     city_lat = Cities.loc[Cities['city'] == citie_selector, 'lat'].iloc[0]
     city_lng = Cities.loc[Cities['city'] == citie_selector, 'lng'].iloc[0]
@@ -138,7 +146,7 @@ def run():
     response = requests.get(overpass_url, params={'data': overpass_query})
     data = response.json()
 
-    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10, no_touch=True)
+    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10, no_touch=True, zoom_control=False,    dragging=False,  scrollWheelZoom=False)
 
     
 
@@ -179,9 +187,12 @@ def run():
         tree_color = st.color_picker("", "#00a67d", key='tree')
         tree_on = st.checkbox(Haies_Dictionnary[Language_option])
 
-    st.markdown("<br/>")
-    st.markdown("<br/>")
-    st.markdown("<br/>")
+    st.text("")
+    st.text("")
+    st.text("")
+    st.text("")
+    st.text("")
+
 
     for element in data['elements']:
         if 'geometry' in element:
@@ -203,10 +214,22 @@ def run():
             elif tree_on and natural_type == 'tree_row':
                 stf.folium.PolyLine(locations=coordinates, color=tree_color).add_to(m)
 
-    # Render the folium map in Streamlit
+
     stf.folium_static(m)
 
-    st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
+    st.text("")
+    st.text("")
+    st.text("")
+    st.text("")
+
+    col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
+    with col_don_1:
+        st.text("")
+    with col_don_2:
+        st.button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
+    with col_don_3:
+        st.text("")
+
 
 if __name__ == "__main__":
     run()
