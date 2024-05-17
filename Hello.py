@@ -171,21 +171,25 @@ def run():
         ).add_to(m)
 
 # Create columns for checkboxes and color pickers
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5, col6 = st.columns([0.1, 0.2, 0.2, 0.2, 0.2, 0.1])
     with col1:
+        st.write("")
+    with col2:
         waterways_color = st.color_picker("", "#00ffff", key='waterways')
         waterways_on = st.checkbox(Cours_d_eaux_Dictionnary[Language_option], value=True)
-    with col2:
+    with col3:
         coastline_color = st.color_picker("", "#c0c0c0", key='coastline')
         coastline_on = st.checkbox(Littoral_Dictionnary[Language_option], value=True)
-    with col3:
+    with col4:
         roads_color = st.color_picker("", "#ffd700", key='trunk')
         trunk_on = st.checkbox(Tronçons_Dictionnary[Language_option], value=True)
         motorway_on = st.checkbox(Autoroutes_Dictionnary[Language_option])
         primary_on = st.checkbox(Boulevards_Dictionnary[Language_option])
-    with col4:
+    with col5:
         tree_color = st.color_picker("", "#00a67d", key='tree')
         tree_on = st.checkbox(Haies_Dictionnary[Language_option])
+    with col6:
+        st.write("")
 
     st.text("")
     st.text("")
