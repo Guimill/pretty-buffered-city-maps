@@ -9,9 +9,9 @@ import pandas as pd
 Exemple_Dictionnary = {
     "French"  : "Pour les villes avec un nom contenant des charactères spéciaux, concatenez les noms",
     "English" : "For cities with a name containing special characters, just write them as glued",
-    "Chinese" : "",
+    "Chinese" : "对于名称中有特殊字符的城市，只需将其写成 并列 即可",
     "Italian" : "Per le città con un nuome contenente caratteri speciali, scrivetele attacato",
-    "Spanish" : "Por ciudad con un llama ...",
+    "Spanish" : "Para las ciudades con un nombre que contengan caracteres especiales, escribalos pegados ...",
     "Breton"  : ""
 }
 
@@ -19,8 +19,8 @@ Ville_Dictionnary = {
     "French"  : "Nommez une ville",
     "English" : "Name a city",
     "Chinese" : "命名一个城市",
-    "Italian" : "Chiamare una città",
-    "Spanish" : "Llamar una ciudad",
+    "Italian" : "Chiama una città",
+    "Spanish" : "Escriba una ciudad",
     "Breton"  : ""
 }
 
@@ -29,7 +29,7 @@ Tronçons_Dictionnary = {
     "English" : "Trunk",
     "Chinese" : "公路路段",
     "Italian" : "Tratti autostrade",
-    "Spanish" : "",
+    "Spanish" : "Nombre autopista",
     "Breton"  : ""
 }
 
@@ -38,7 +38,7 @@ Autoroutes_Dictionnary = {
     "English" : "Motorways",
     "Chinese" : "高速公路",
     "Italian" : "Autostrade",
-    "Spanish" : "",
+    "Spanish" : "Autopista",
     "Breton"  : ""
 }
 
@@ -47,7 +47,7 @@ Boulevards_Dictionnary = {
     "English" : "Boulevards",
     "Chinese" : "林荫大道",
     "Italian" : "Viali",
-    "Spanish" : "",
+    "Spanish" : "Boulevards",
     "Breton"  : ""
 }
 
@@ -55,8 +55,8 @@ Haies_Dictionnary = {
     "French"  : "Haies",
     "English" : "Tree rows",
     "Chinese" : "树篱",
-    "Italian" : "Ostacoli",
-    "Spanish" : "",
+    "Italian" : "Siepi",
+    "Spanish" : "Senderos",
     "Breton"  : ""
 }
 
@@ -65,16 +65,16 @@ Cours_d_eaux_Dictionnary = {
     "English" : "Rivers",
     "Chinese" : "川",
     "Italian" : "Fiumi",
-    "Spanish" : "",
+    "Spanish" : "Rios",
     "Breton"  : ""
 }
 
 Littoral_Dictionnary = {
     "French"  : "Littoral",
     "English" : "Coastlines",
-    "Chinese" : "",
-    "Italian" : "",
-    "Spanish" : "",
+    "Chinese" : "岸线",
+    "Italian" : "Costa",
+    "Spanish" : "Costa",
     "Breton"  : ""
 }
 
@@ -95,13 +95,13 @@ def run():
         page_icon="👋",
     )
 
-    Language_option = st.selectbox("Languages :",("English", "French", "Chinese","Italian","Spanish","Breton"))
+    Language_option = st.selectbox("",("English", "French", "Chinese","Italian","Spanish","Breton"))
 
     st.write("# Beautiful Map Designer !")
 
     st.markdown(f""" {Exemple_Dictionnary[Language_option]}.
                 
-                example : Aix-en-Provence -> aixenprovence
+                Aix-en-Provence -> aixenprovence
                 """)
 
     citie_selector = st.text_input(f'{Ville_Dictionnary[Language_option]}', 'Paris')
@@ -179,7 +179,9 @@ def run():
         tree_color = st.color_picker("", "#00a67d", key='tree')
         tree_on = st.checkbox(Haies_Dictionnary[Language_option])
 
-
+    st.markdown("<br/>")
+    st.markdown("<br/>")
+    st.markdown("<br/>")
 
     for element in data['elements']:
         if 'geometry' in element:
@@ -204,6 +206,7 @@ def run():
     # Render the folium map in Streamlit
     stf.folium_static(m)
 
+    st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
 
 if __name__ == "__main__":
     run()
