@@ -103,63 +103,6 @@ def run():
     st.text("")
     st.text("")
 
-    # Inject JavaScript to extract the SVG and handle the download
-    html_content = """
-    <script>
-    function extractSVG() {
-        const svgElement = document.querySelector('.leaflet-zoom-animated');
-        if (svgElement) {
-            const svgData = new XMLSerializer().serializeToString(svgElement);
-            const base64SVG = btoa(svgData);
-            document.getElementById('svgData').value = base64SVG;
-        }
-    }
-
-    function triggerDownload() {
-        extractSVG();
-        document.getElementById('downloadForm').submit();
-    }
-    </script>
-
-    <button onclick="triggerDownload()">Download SVG</button>
-    <form id="downloadForm" method="post" action="">
-        <input type="hidden" id="svgData" name="svgData">
-    </form>
-    """
-
-    st.components.v1.html(html_content, height=100)
-
-    # Handle the SVG data sent from the form
-    if 'svgData' in st.session_state:
-        svg_data = st.session_state['svgData']
-        svg_bytes = base64.b64decode(svg_data)
-        st.download_button(label="Download Extracted SVG", data=svg_bytes, file_name="map.svg", mime="image/svg+xml")
-
-    # Save Folium map as PNG
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
-        m.save(tmpfile.name)
-        image_path = tmpfile.name
-
-        # Open the image using PIL and manipulate if needed
-        with Image.open(image_path) as image:
-            # Example manipulation: Draw a border around the image
-            draw = ImageDraw.Draw(image)
-            width, height = image.size
-            border_color = "red"
-            border_width = 10
-            draw.rectangle(
-                [border_width / 2, border_width / 2, width - border_width / 2, height - border_width / 2],
-                outline=border_color, width=border_width
-            )
-
-            # Convert image to bytes
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
-                image.save(tmpfile.name)
-                manipulated_image_path = tmpfile.name
-
-            with open(manipulated_image_path, 'rb') as f:
-                image_data = f.read()
-
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
         st.text("")
