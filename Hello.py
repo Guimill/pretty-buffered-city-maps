@@ -5,7 +5,6 @@ import pandas as pd
 import tempfile
 from PIL import Image, ImageDraw
 import streamlit_folium as stf
-import cairosvg
 import io
 from language import (
     Exemple_Dictionnary, Ville_Dictionnary, Tronçons_Dictionnary,
