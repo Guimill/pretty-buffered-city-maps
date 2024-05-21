@@ -98,18 +98,7 @@ def run():
 
     m = create_map(city_lat, city_lng)
     m = add_elements_to_map(data, m, colors, options)
-    
-    # Convert SVG to PNG
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".svg") as tmpfile_svg:
-        m.save(tmpfile_svg.name)
-        tmpfile_svg.close()
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile_png:
-            cairosvg.svg2png(url=tmpfile_svg.name, write_to=tmpfile_png.name)
-            tmpfile_png.close()
-            with open(tmpfile_png.name, "rb") as f:
-                png_data = f.read()
-    
-    st.image(png_data, use_column_width=True)
+    stf.folium_static(m)
 
     st.text("")
     st.text("")
