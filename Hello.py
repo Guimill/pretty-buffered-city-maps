@@ -1,84 +1,18 @@
 import streamlit as st
-from streamlit.logger import get_logger
-import streamlit_folium as stf
-import re, requests
+import re
+import base64
 import pandas as pd
+import tempfile
+from PIL import Image, ImageDraw
+import streamlit_folium as stf
+from language import (
+    Exemple_Dictionnary, Ville_Dictionnary, Tronçons_Dictionnary,
+    Autoroutes_Dictionnary, Boulevards_Dictionnary, Haies_Dictionnary,
+    Cours_d_eaux_Dictionnary, Littoral_Dictionnary
+)
+from map_utils import create_map, add_elements_to_map, fetch_map_data
 
-#### Languages ####
-
-Exemple_Dictionnary = {
-    "French"  : "Pour les villes avec un nom contenant des charactères spéciaux, concatenez les noms",
-    "English" : "For cities with a name containing special characters, just write them as glued",
-    "Chinese" : "对于名称中有特殊字符的城市，只需将其写成 并列 即可",
-    "Italian" : "Per le città con un nuome contenente caratteri speciali, scrivetele attacato",
-    "Spanish" : "Para las ciudades con un nombre que contengan caracteres especiales, escribalos pegados ...",
-    "Breton"  : ""
-}
-
-Ville_Dictionnary = {
-    "French"  : "Nommez une ville",
-    "English" : "Name a city",
-    "Chinese" : "命名一个城市",
-    "Italian" : "Chiama una città",
-    "Spanish" : "Escriba una ciudad",
-    "Breton"  : ""
-}
-
-Tronçons_Dictionnary = {
-    "French"  : "Tronçons",
-    "English" : "Trunk",
-    "Chinese" : "公路路段",
-    "Italian" : "Tratti autostrade",
-    "Spanish" : "Nombre autopista",
-    "Breton"  : ""
-}
-
-Autoroutes_Dictionnary = {
-    "French"  : "Autoroutes",
-    "English" : "Motorways",
-    "Chinese" : "高速公路",
-    "Italian" : "Autostrade",
-    "Spanish" : "Autopista",
-    "Breton"  : ""
-}
-
-Boulevards_Dictionnary = {
-    "French"  : "Boulevards",
-    "English" : "Boulevards",
-    "Chinese" : "林荫大道",
-    "Italian" : "Viali",
-    "Spanish" : "Boulevards",
-    "Breton"  : ""
-}
-
-Haies_Dictionnary = {
-    "French"  : "Haies",
-    "English" : "Tree rows",
-    "Chinese" : "树篱",
-    "Italian" : "Siepi",
-    "Spanish" : "Senderos",
-    "Breton"  : ""
-}
-
-Cours_d_eaux_Dictionnary = {
-    "French"  : "Cours d'eau",
-    "English" : "Rivers",
-    "Chinese" : "川",
-    "Italian" : "Fiumi",
-    "Spanish" : "Rios",
-    "Breton"  : ""
-}
-
-Littoral_Dictionnary = {
-    "French"  : "Littoral",
-    "English" : "Coastlines",
-    "Chinese" : "岸线",
-    "Italian" : "Costa",
-    "Spanish" : "Costa",
-    "Breton"  : ""
-}
-
-
+# Load the cities data
 Cities = pd.read_csv('data/worldcities.csv')
 
 def remove_special_chars(city):
@@ -88,12 +22,10 @@ def remove_special_chars(city):
 Cities['city'] = Cities['city'].apply(remove_special_chars)
 Cities['city'] = Cities['city'].str.lower()
 
-overpass_url = "https://overpass-api.de/api/"
-
 def run():
     st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
+        page_title="Beautiful Map Designer",
+        page_icon="🗺️",
     )
 
     col_language_1, col_language_2, col_language_3, col_language_4 = st.columns(4)
@@ -104,7 +36,7 @@ def run():
     with col_language_3:
         st.text("")
     with col_language_4:
-        Language_option = st.selectbox("",("French", "English", "Chinese","Italian","Spanish","Breton"))
+        Language_option = st.selectbox("", ("French", "English", "Chinese", "Italian", "Spanish", "Breton"))
 
     st.write("# Beautiful Map Designer !")
 
@@ -118,60 +50,6 @@ def run():
     city_lat = Cities.loc[Cities['city'] == citie_selector, 'lat'].iloc[0]
     city_lng = Cities.loc[Cities['city'] == citie_selector, 'lng'].iloc[0]
 
-    radius = 0.01  # 1 degree is approximately 111 kilometers
-
-    # Calculate bounding box coordinates
-    min_lat = city_lat - radius
-    max_lat = city_lat + radius
-    min_lng = city_lng - radius
-    max_lng = city_lng + radius
-
-    # Bounding box format: (min_lat, min_lng, max_lat, max_lng)
-    bbox = (min_lat, min_lng, max_lat, max_lng)
-
-    overpass_url = "http://overpass-api.de/api/interpreter"  # Replace with the appropriate Overpass API endpoint
-
-    overpass_query = f"""
-        [out:json];
-        (
-        way["highway"="trunk"](around:50000, {city_lat}, {city_lng});
-        way["highway"="motorway"](around:50000, {city_lat}, {city_lng});
-        way["highway"="primary"](around:20000, {city_lat}, {city_lng});
-        way["waterway"="river"](around:20000, {city_lat}, {city_lng});
-        way["natural"="tree_row"](around:30000, {city_lat}, {city_lng});
-        way["natural"="coastline"](around:100000, {city_lat}, {city_lng});
-        );
-        out geom;
-    """
-
-    response = requests.get(overpass_url, params={'data': overpass_query})
-    data = response.json()
-
-    m = stf.folium.Map(location=[city_lat, city_lng], zoom_start=10, no_touch=True, zoom_control=False,    dragging=False,  scrollWheelZoom=False)
-
-    
-
-    radius = 500
-    stf.folium.CircleMarker(
-        location=[city_lat, city_lng],
-        radius=radius,
-        color="white",
-        stroke=False,
-        fill=True,
-        fill_opacity=1,
-        ).add_to(m)
-
-
-    stf.folium.CircleMarker(
-        location=[city_lat, city_lng],
-        radius=radius - 250,
-        color="#0e1117",
-        stroke=False,
-        fill=True,
-        fill_opacity=1,
-        ).add_to(m)
-
-# Create columns for checkboxes and color pickers
     col1, col2, col3, col4, col5, col6 = st.columns([0.1, 0.2, 0.2, 0.2, 0.2, 0.1])
     with col1:
         st.write("")
@@ -198,35 +76,90 @@ def run():
     st.text("")
     st.text("")
 
+    data = fetch_map_data(city_lat, city_lng)
+    
+    colors = {
+        'waterways': waterways_color,
+        'coastline': coastline_color,
+        'trunk': roads_color,
+        'tree': tree_color
+    }
+    
+    options = {
+        'waterways_on': waterways_on,
+        'coastline_on': coastline_on,
+        'trunk_on': trunk_on,
+        'motorway_on': motorway_on,
+        'primary_on': primary_on,
+        'tree_on': tree_on
+    }
 
-    for element in data['elements']:
-        if 'geometry' in element:
-            coordinates = [(node['lat'], node['lon']) for node in element['geometry']]
-            highway_type = element['tags'].get('highway')
-            natural_type = element['tags'].get('natural')
-            waterway_type = element['tags'].get('waterway')
-
-            if waterways_on and waterway_type == 'river':
-                stf.folium.PolyLine(locations=coordinates, color=waterways_color).add_to(m)
-            elif trunk_on and highway_type == 'trunk':
-                stf.folium.PolyLine(locations=coordinates, color=roads_color).add_to(m)
-            elif motorway_on and highway_type == 'motorway':
-                stf.folium.PolyLine(locations=coordinates, color=roads_color).add_to(m)
-            elif primary_on and highway_type == 'primary':
-                stf.folium.PolyLine(locations=coordinates, color=roads_color).add_to(m)
-            elif coastline_on and natural_type == 'coastline':
-                stf.folium.PolyLine(locations=coordinates, color=coastline_color).add_to(m)
-            elif tree_on and natural_type == 'tree_row':
-                stf.folium.PolyLine(locations=coordinates, color=tree_color).add_to(m)
-
-
+    m = create_map(city_lat, city_lng)
+    m = add_elements_to_map(data, m, colors, options)
     stf.folium_static(m)
 
     st.text("")
     st.text("")
     st.text("")
     st.text("")
-    
+
+    # Inject JavaScript to extract the SVG and handle the download
+    html_content = """
+    <script>
+    function extractSVG() {
+        const svgElement = document.querySelector('.leaflet-zoom-animated');
+        if (svgElement) {
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const base64SVG = btoa(svgData);
+            document.getElementById('svgData').value = base64SVG;
+        }
+    }
+
+    function triggerDownload() {
+        extractSVG();
+        document.getElementById('downloadForm').submit();
+    }
+    </script>
+
+    <button onclick="triggerDownload()">Download SVG</button>
+    <form id="downloadForm" method="post" action="">
+        <input type="hidden" id="svgData" name="svgData">
+    </form>
+    """
+
+    st.components.v1.html(html_content, height=100)
+
+    # Handle the SVG data sent from the form
+    if 'svgData' in st.session_state:
+        svg_data = st.session_state['svgData']
+        svg_bytes = base64.b64decode(svg_data)
+        st.download_button(label="Download Extracted SVG", data=svg_bytes, file_name="map.svg", mime="image/svg+xml")
+
+    # Save Folium map as PNG
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+        m.save(tmpfile.name)
+        image_path = tmpfile.name
+
+        # Open the image using PIL and manipulate if needed
+        with Image.open(image_path) as image:
+            # Example manipulation: Draw a border around the image
+            draw = ImageDraw.Draw(image)
+            width, height = image.size
+            border_color = "red"
+            border_width = 10
+            draw.rectangle(
+                [border_width / 2, border_width / 2, width - border_width / 2, height - border_width / 2],
+                outline=border_color, width=border_width
+            )
+
+            # Convert image to bytes
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+                image.save(tmpfile.name)
+                manipulated_image_path = tmpfile.name
+
+            with open(manipulated_image_path, 'rb') as f:
+                image_data = f.read()
+
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
         st.text("")
@@ -234,7 +167,6 @@ def run():
         st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
     with col_don_3:
         st.text("")
-
 
 if __name__ == "__main__":
     run()
