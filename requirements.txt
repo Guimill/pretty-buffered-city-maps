@@ -7,4 +7,3 @@ streamlit-folium
 osmnx
 selenium
 pyppeteer
-libcairo2-dev
