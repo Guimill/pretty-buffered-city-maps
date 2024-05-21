@@ -5,6 +5,8 @@ import pandas as pd
 import tempfile
 from PIL import Image, ImageDraw
 import streamlit_folium as stf
+import cairosvg
+import io
 from language import (
     Exemple_Dictionnary, Ville_Dictionnary, Tronçons_Dictionnary,
     Autoroutes_Dictionnary, Boulevards_Dictionnary, Haies_Dictionnary,
@@ -96,7 +98,18 @@ def run():
 
     m = create_map(city_lat, city_lng)
     m = add_elements_to_map(data, m, colors, options)
-    stf.folium_static(m)
+    
+    # Convert SVG to PNG
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".svg") as tmpfile_svg:
+        m.save(tmpfile_svg.name)
+        tmpfile_svg.close()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile_png:
+            cairosvg.svg2png(url=tmpfile_svg.name, write_to=tmpfile_png.name)
+            tmpfile_png.close()
+            with open(tmpfile_png.name, "rb") as f:
+                png_data = f.read()
+    
+    st.image(png_data, use_column_width=True)
 
     st.text("")
     st.text("")
