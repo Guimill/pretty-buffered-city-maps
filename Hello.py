@@ -116,11 +116,12 @@ def run():
         
         if svg_element:
             # If the SVG element is found, you can print or manipulate it here
-            print(svg_element)
+            st.code(svg_element)
+            st.write(svg_element)
         else:
-            print("SVG element not found.")
+            st.write("SVG element not found.")
     else:
-        print("Failed to fetch the page.")
+        st.write("Failed to fetch the page.")
     
 
 #    svg_content = '''
