@@ -1,16 +1,15 @@
 import streamlit as st
-import re
-import base64
+from bs4 import BeautifulSoup
+import re, requests
+import cairosvg
 import pandas as pd
-import tempfile
-from PIL import Image, ImageDraw
 import streamlit_folium as stf
+from map_utils import create_map, add_elements_to_map, fetch_map_data
 from language import (
     Exemple_Dictionnary, Ville_Dictionnary, Tronçons_Dictionnary,
     Autoroutes_Dictionnary, Boulevards_Dictionnary, Haies_Dictionnary,
     Cours_d_eaux_Dictionnary, Littoral_Dictionnary
 )
-from map_utils import create_map, add_elements_to_map, fetch_map_data
 
 # Load the cities data
 Cities = pd.read_csv('data/worldcities.csv')
@@ -55,13 +54,13 @@ def run():
         st.write("")
     with col2:
         waterways_color = st.color_picker("", "#00ffff", key='waterways')
-        waterways_on = st.checkbox(Cours_d_eaux_Dictionnary[Language_option], value=True)
+        waterways_on = st.checkbox(Cours_d_eaux_Dictionnary[Language_option])
     with col3:
         coastline_color = st.color_picker("", "#c0c0c0", key='coastline')
-        coastline_on = st.checkbox(Littoral_Dictionnary[Language_option], value=True)
+        coastline_on = st.checkbox(Littoral_Dictionnary[Language_option])
     with col4:
         roads_color = st.color_picker("", "#ffd700", key='trunk')
-        trunk_on = st.checkbox(Tronçons_Dictionnary[Language_option], value=True)
+        trunk_on = st.checkbox(Tronçons_Dictionnary[Language_option])
         motorway_on = st.checkbox(Autoroutes_Dictionnary[Language_option])
         primary_on = st.checkbox(Boulevards_Dictionnary[Language_option])
     with col5:
@@ -102,6 +101,41 @@ def run():
     st.text("")
     st.text("")
     st.text("")
+
+    url = "https://pretty-buffered-city-maps.streamlit.app"
+
+    # Send a GET request to the URL
+    response = requests.get(url)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Find the SVG element by its ID or class
+        svg_element = soup.find('svg', id='your-svg-id')
+        
+        if svg_element:
+            # If the SVG element is found, you can print or manipulate it here
+            print(svg_element)
+        else:
+            print("SVG element not found.")
+    else:
+        print("Failed to fetch the page.")
+    
+
+#    svg_content = '''
+#    <svg width="704" height="516.8" xmlns="http://www.w3.org/2000/svg">
+#        <g>
+#            <path class="leaflet-interactive" stroke="none" fill="white" fill-opacity="1" fill-rule="evenodd" d="M-150,255a500,500 0 1,0 1000,0 a500,500 0 1,0 -1000,0 "></path>
+#            <path class="leaflet-interactive" stroke="none" fill="#0e1117" fill-opacity="1" fill-rule="evenodd" d="M100,255a250,250 0 1,0 500,0 a250,250 0 1,0 -500,0 "></path>
+#        </g>
+#    </svg>
+#    '''
+
+    # Convert SVG to PNG
+#    cairosvg.svg2png(bytestring=svg_content.encode(), write_to="output.png")
+
 
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
