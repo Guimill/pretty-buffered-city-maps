@@ -4,7 +4,6 @@ import re, requests
 import cairosvg
 import pandas as pd
 import streamlit_folium as stf
-from map_utils import create_map, add_elements_to_map, fetch_map_data
 from language import (
     Exemple_Dictionnary, Ville_Dictionnary, Tronçons_Dictionnary,
     Autoroutes_Dictionnary, Boulevards_Dictionnary, Haies_Dictionnary,
