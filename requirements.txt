@@ -7,5 +7,4 @@ streamlit-folium
 osmnx
 selenium
 pyppeteer
-
 bs4

@@ -1,7 +1,6 @@
 import streamlit as st
 from bs4 import BeautifulSoup
 import re, requests
-import cairosvg
 import pandas as pd
 import streamlit_folium as stf
 from map_utils import (create_map,fetch_map_data,add_elements_to_map)
