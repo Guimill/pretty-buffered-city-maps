@@ -101,7 +101,7 @@ def run():
     st.text("")
     st.text("")
 
-    url = "https://pretty-buffered-city-maps.streamlit.app"
+    url = "https://pretty-buffered-city-maps.streamlit.app/"
 
     # Send a GET request to the URL
     response = requests.get(url)
