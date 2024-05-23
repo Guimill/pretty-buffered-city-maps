@@ -53,13 +53,13 @@ def run():
         st.write("")
     with col2:
         waterways_color = st.color_picker("", "#00ffff", key='waterways')
-        waterways_on = st.checkbox(Cours_d_eaux_Dictionnary[Language_option])
+        waterways_on = st.checkbox(Cours_d_eaux_Dictionnary[Language_option], value = True)
     with col3:
         coastline_color = st.color_picker("", "#c0c0c0", key='coastline')
-        coastline_on = st.checkbox(Littoral_Dictionnary[Language_option])
+        coastline_on = st.checkbox(Littoral_Dictionnary[Language_option], value = True)
     with col4:
         roads_color = st.color_picker("", "#ffd700", key='trunk')
-        trunk_on = st.checkbox(Tronçons_Dictionnary[Language_option])
+        trunk_on = st.checkbox(Tronçons_Dictionnary[Language_option], value = True)
         motorway_on = st.checkbox(Autoroutes_Dictionnary[Language_option])
         primary_on = st.checkbox(Boulevards_Dictionnary[Language_option])
     with col5:
