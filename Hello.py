@@ -101,27 +101,27 @@ def run():
     st.text("")
     st.text("")
 
-    url = "https://pretty-buffered-city-maps.streamlit.app/"
+#    url = "https://pretty-buffered-city-maps.streamlit.app/"
 
     # Send a GET request to the URL
-    response = requests.get(url)
+#    response = requests.get(url)
 
     # Check if the request was successful (status code 200)
-    if response.status_code == 200:
+#    if response.status_code == 200:
         # Parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(response.content, 'html.parser')
+#        soup = BeautifulSoup(response.content, 'html.parser')
         
         # Find the SVG element by its ID or class
-        svg_element = soup.find('svg', id='your-svg-id')
+#        svg_element = soup.find('svg', id='your-svg-id')
         
-        if svg_element:
+#        if svg_element:
             # If the SVG element is found, you can print or manipulate it here
-            st.code(svg_element)
-            st.write(svg_element)
-        else:
-            st.write("SVG element not found.")
-    else:
-        st.write("Failed to fetch the page.")
+#            st.code(svg_element)
+#            st.write(svg_element)
+#        else:
+#            st.write("SVG element not found.")
+#    else:
+#        st.write("Failed to fetch the page.")
     
 
 #    svg_content = '''
