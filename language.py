@@ -6,7 +6,7 @@ Exemple_Dictionnary = {
     "Chinese" : "对于名称中有特殊字符的城市，只需将其写成 并列 即可",
     "Italian" : "Per le città con un nuome contenente caratteri speciali, scrivetele attacato",
     "Spanish" : "Para las ciudades con un nombre que contengan caracteres especiales, escribalos pegados ...",
-    "Breton"  : ""
+    "Breton"  : "Evit ar c'hêrioù o deus un anv gant sifroù difer, pegit an anvioù"
 }
 
 Ville_Dictionnary = {
@@ -15,7 +15,7 @@ Ville_Dictionnary = {
     "Chinese" : "命名一个城市",
     "Italian" : "Chiama una città",
     "Spanish" : "Escriba una ciudad",
-    "Breton"  : ""
+    "Breton"  : "kêr"
 }
 
 Tronçons_Dictionnary = {
@@ -24,7 +24,7 @@ Tronçons_Dictionnary = {
     "Chinese" : "公路路段",
     "Italian" : "Tratti autostrade",
     "Spanish" : "Nombre autopista",
-    "Breton"  : ""
+    "Breton"  : "Gourhent tro-kêr"
 }
 
 Autoroutes_Dictionnary = {
@@ -33,7 +33,7 @@ Autoroutes_Dictionnary = {
     "Chinese" : "高速公路",
     "Italian" : "Autostrade",
     "Spanish" : "Autopista",
-    "Breton"  : ""
+    "Breton"  : "Gourhent"
 }
 
 Boulevards_Dictionnary = {
@@ -42,7 +42,7 @@ Boulevards_Dictionnary = {
     "Chinese" : "林荫大道",
     "Italian" : "Viali",
     "Spanish" : "Boulevards",
-    "Breton"  : ""
+    "Breton"  : "Boulouard"
 }
 
 Haies_Dictionnary = {
@@ -60,7 +60,7 @@ Cours_d_eaux_Dictionnary = {
     "Chinese" : "川",
     "Italian" : "Fiumi",
     "Spanish" : "Rios",
-    "Breton"  : ""
+    "Breton"  : "Stêr"
 }
 
 Littoral_Dictionnary = {
@@ -69,5 +69,5 @@ Littoral_Dictionnary = {
     "Chinese" : "岸线",
     "Italian" : "Costa",
     "Spanish" : "Costa",
-    "Breton"  : ""
+    "Breton"  : "Arvor"
 }
