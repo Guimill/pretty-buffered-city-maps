@@ -2,6 +2,9 @@ import streamlit as st
 from bs4 import BeautifulSoup
 import re, requests
 import pandas as pd
+import io
+from PIL import Image
+import selenium
 import streamlit_folium as stf
 from map_utils import (create_map,fetch_map_data,add_elements_to_map)
 from language import (
@@ -136,6 +139,13 @@ def run():
     # Convert SVG to PNG
 #    cairosvg.svg2png(bytestring=svg_content.encode(), write_to="output.png")
 
+    img_data = m._to_png(5)
+    img = Image.open(io.BytesIO(img_data))
+    img_path = 'image.png'
+    img.save(img_path)
+    
+    # Offer the PNG image as a downloadable file using Streamlit
+    st.download_button(label="Download PNG", data=img_path, file_name="image.png", mime="image/png")
 
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
