@@ -113,19 +113,19 @@ def run():
     st.text("")
     
     img_data = m._to_png(5)
-    
-    # Open the PNG image data as a PIL Image object
-    with Image.open(io.BytesIO(img_data)) as im:
-        # Define the cropping coordinates
-        left, upper, right, lower = 50, 20, 50, 20
-    
-        # Crop the image
-        im_crop = im.crop((left, upper, right, lower))
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
-        im_crop.save(tmp_file.name)
 
-        # Display the cropped image
-        st.image(tmp_file.name)
+    with Image.open(io.BytesIO(img_data)) as im:
+    # Define the cropping coordinates
+    left, upper, right, lower = 50, 20, 50, 20
+    # Crop the image
+    im_crop = im.crop((left, upper, right, lower))
+
+    # Save the cropped image to a BytesIO object
+    img_buffer = io.BytesIO()
+    im_crop.save(img_buffer, format='PNG')
+
+    # Display the cropped image
+    st.image(img_buffer, use_column_width=True)
     
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
