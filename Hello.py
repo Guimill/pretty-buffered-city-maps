@@ -113,27 +113,19 @@ def run():
     st.text("")
     
     img_data = m._to_png(5)
-    
-    # Assuming img_data is the PNG image data obtained from m._to_png(5)
-    img = Image.open(io.BytesIO(img_data))
-    
-    # Resize the image to the desired width and height
-    width = 500  # specify the desired width
-    height = 300  # specify the desired height
-    img = img.resize((width, height), Image.ANTIALIAS)
-    
-    # Convert the resized image back to PNG format
-    buffered = io.BytesIO()
-    img.save(buffered, format="PNG")
-    
-    # Get the image data as bytes
-    img_data_resized = buffered.getvalue()
+    img = io.BytesIO(img_data)
+
+    left = 0
+    top = 0
+    right = 800
+    bottom = 600
+    img = img.crop((left, top, right, bottom))
     
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
         st.text("")
     with col_don_2:
-        st.download_button(label="Download PNG", data=img_data_resized , file_name="image.png")
+        st.download_button(label="Download PNG", data=img , file_name="image.png")
         st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
     with col_don_3:
         st.text("")
