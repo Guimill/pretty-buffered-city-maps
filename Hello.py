@@ -111,11 +111,23 @@ def run():
     st.text("")
     st.text("")
     st.text("")
-
-    m.width, m.height = 800, 600 
     
     img_data = m._to_png(5)
-    img = io.BytesIO(img_data)
+    
+    # Assuming img_data is the PNG image data obtained from m._to_png(5)
+    img = Image.open(io.BytesIO(img_data))
+    
+    # Resize the image to the desired width and height
+    width = 500  # specify the desired width
+    height = 300  # specify the desired height
+    img = img.resize((width, height), Image.ANTIALIAS)
+    
+    # Convert the resized image back to PNG format
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    
+    # Get the image data as bytes
+    img_data_resized = buffered.getvalue()
     
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
