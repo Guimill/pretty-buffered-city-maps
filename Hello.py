@@ -113,8 +113,20 @@ def run():
     st.text("")
     
     img_data = m._to_png(5)
-    img = io.BytesIO(img_data)
-    img.crop((50, 20, 20, 50))
+
+    with Image.open(io.BytesIO(img_data)) as im:
+    # Define the cropping coordinates
+    left, upper, right, lower = 50, 20, 20, 50
+
+    # Crop the image
+    im_crop = im.crop((left, upper, right, lower))
+
+    # Save the cropped image to a temporary file
+    with tempfile.NamedTemporaryFile(suffix=".png") as tmp_file:
+        im_crop.save(tmp_file.name)
+
+        # Display the cropped image
+        st.image(tmp_file.name, use_column_width=True)
 
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
