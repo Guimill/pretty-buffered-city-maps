@@ -113,13 +113,17 @@ def run():
     st.text("")
     
     img_data = m._to_png(5)
-    img = io.BytesIO(img_data)
-
-    left = 0
-    top = 0
-    right = 800
-    bottom = 600
-    img = img.crop((left, top, right, bottom))
+    
+    # Open the PNG image data as a PIL Image object
+    with Image.open(io.BytesIO(img_data)) as im:
+        # Define the cropping coordinates
+        left, upper, right, lower = 20, 20, 200, 100
+    
+        # Crop the image
+        im_crop = im.crop((left, upper, right, lower))
+    
+        # Display the cropped image
+        st.image(im_crop)
     
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
