@@ -133,7 +133,7 @@ def run():
     with col_don_1:
         st.text("")
     with col_don_2:
-        st.download_button(label="Download PNG", data=img, file_name="image.png")
+        st.download_button(label="Download PNG", data=img_data_resized , file_name="image.png")
         st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
     with col_don_3:
         st.text("")
