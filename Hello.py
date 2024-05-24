@@ -117,7 +117,7 @@ def run():
     # Open the PNG image data as a PIL Image object
     with Image.open(io.BytesIO(img_data)) as im:
         # Define the cropping coordinates
-        left, upper, right, lower = 20, 20, 20, 20
+        left, upper, right, lower = 50, 20, 50, 20
     
         # Crop the image
         im_crop = im.crop((left, upper, right, lower))
@@ -129,7 +129,7 @@ def run():
     with col_don_1:
         st.text("")
     with col_don_2:
-        st.download_button(label="Download PNG", data=img , file_name="image.png")
+        st.download_button(label="Download PNG", data=im_crop , file_name="image.png")
         st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
     with col_don_3:
         st.text("")
