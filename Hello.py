@@ -117,7 +117,7 @@ def run():
     # Open the PNG image data as a PIL Image object
     with Image.open(io.BytesIO(img_data)) as im:
         # Define the cropping coordinates
-        left, upper, right, lower = 20, 20, 200, 100
+        left, upper, right, lower = 20, 20, 20, 20
     
         # Crop the image
         im_crop = im.crop((left, upper, right, lower))
