@@ -121,15 +121,17 @@ def run():
     
         # Crop the image
         im_crop = im.crop((left, upper, right, lower))
-    
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
+        im_crop.save(tmp_file.name)
+
         # Display the cropped image
-        st.image(im_crop)
+        st.image(tmp_file.name)
     
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
         st.text("")
     with col_don_2:
-        st.download_button(label="Download PNG", data=im_crop , file_name="image.png")
+        st.download_button(label="Download PNG", data=tmp_file.name , file_name="image.png")
         st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
     with col_don_3:
         st.text("")
