@@ -113,19 +113,13 @@ def run():
     st.text("")
     
     img_data = m._to_png(5)
+    img = io.BytesIO(img_data)
 
-    with Image.open(io.BytesIO(img_data)) as im:
-        # Define the cropping coordinates
-        left, upper, right, lower = 50, 20, 50, 20
-        # Crop the image
-        im_crop = im.crop((left, upper, right, lower))
-
-    
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
         st.text("")
     with col_don_2:
-        st.download_button(label="Download PNG", data=im_crop , file_name="image.png")
+        st.download_button(label="Download PNG", data=img , file_name="image.png")
         st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
     with col_don_3:
         st.text("")
