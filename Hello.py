@@ -112,6 +112,8 @@ def run():
     st.text("")
     st.text("")
 
+    m.width, m.height = 800, 600 
+    
     img_data = m._to_png(5)
     img = io.BytesIO(img_data)
     
