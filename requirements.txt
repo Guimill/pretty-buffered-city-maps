@@ -8,3 +8,4 @@ osmnx
 selenium
 pyppeteer
 bs4
+pillow
