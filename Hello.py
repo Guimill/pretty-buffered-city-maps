@@ -117,7 +117,7 @@ def run():
 
     with Image.open(io.BytesIO(img_data)) as im:
         # Define the cropping coordinates
-        left, upper, right, lower = 100, 500, 1000, 100
+        left, upper, right, lower = 100, 0, 800, 100
     
         # Crop the image
         im_crop = im.crop((left, upper, right, lower))
