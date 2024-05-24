@@ -112,53 +112,16 @@ def run():
     st.text("")
     st.text("")
 
-#    url = "https://pretty-buffered-city-maps.streamlit.app/"
-
-    # Send a GET request to the URL
-#    response = requests.get(url)
-
-    # Check if the request was successful (status code 200)
-#    if response.status_code == 200:
-        # Parse the HTML content using BeautifulSoup
-#        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Find the SVG element by its ID or class
-#        svg_element = soup.find('svg', id='your-svg-id')
-        
-#        if svg_element:
-            # If the SVG element is found, you can print or manipulate it here
-#            st.code(svg_element)
-#            st.write(svg_element)
-#        else:
-#            st.write("SVG element not found.")
-#    else:
-#        st.write("Failed to fetch the page.")
-    
-
-#    svg_content = '''
-#    <svg width="704" height="516.8" xmlns="http://www.w3.org/2000/svg">
-#        <g>
-#            <path class="leaflet-interactive" stroke="none" fill="white" fill-opacity="1" fill-rule="evenodd" d="M-150,255a500,500 0 1,0 1000,0 a500,500 0 1,0 -1000,0 "></path>
-#            <path class="leaflet-interactive" stroke="none" fill="#0e1117" fill-opacity="1" fill-rule="evenodd" d="M100,255a250,250 0 1,0 500,0 a250,250 0 1,0 -500,0 "></path>
-#        </g>
-#    </svg>
-#    '''
-
-    # Convert SVG to PNG
-#    cairosvg.svg2png(bytestring=svg_content.encode(), write_to="output.png")
-
     img_data = m._to_png(5)
     img = Image.open(io.BytesIO(img_data))
     img_path = 'image.png'
     img.save(img_path)
     
-    # Offer the PNG image as a downloadable file using Streamlit
-    st.download_button(label="Download PNG", data=img_path, file_name="image.png", mime="image/png")
-
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
         st.text("")
     with col_don_2:
+        st.download_button(label="Download PNG", data=img_path, file_name="image.png")
         st.link_button("Je ne vends pas les cartes, si vous voulez soutenir mon travail vous pouvez me faire un don :", "https://liberapay.com/SchwarzLowe")
     with col_don_3:
         st.text("")
