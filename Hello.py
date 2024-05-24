@@ -114,6 +114,7 @@ def run():
     
     img_data = m._to_png(5)
     img = io.BytesIO(img_data)
+    img.crop((50, 20, 20, 50))
 
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
