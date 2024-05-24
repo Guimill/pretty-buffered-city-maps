@@ -1,10 +1,18 @@
 import streamlit as st
+import time
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.firefox import GeckoDriverManager
 from bs4 import BeautifulSoup
 import re, requests
 import pandas as pd
 import io
 from PIL import Image
-import selenium
 import streamlit_folium as stf
 from map_utils import (create_map,fetch_map_data,add_elements_to_map)
 from language import (
