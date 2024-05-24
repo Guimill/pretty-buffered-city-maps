@@ -9,3 +9,4 @@ selenium
 pyppeteer
 bs4
 pillow
+webdriver-manager
