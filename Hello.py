@@ -116,6 +116,7 @@ def run():
     img = Image.open(io.BytesIO(img_data))
     img_path = 'image.png'
     img.save(img_path)
+    st.image(io.BytesIO(img_data))
     
     col_don_1, col_don_2, col_don_3 = st.columns([0.1, 0.8, 0.1])
     with col_don_1:
