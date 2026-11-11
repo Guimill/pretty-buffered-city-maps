@@ -17,7 +17,15 @@ from language import (
     Tronçons_Dictionnary,
     Ville_Dictionnary,
 )
-from map_utils import MapDataError, add_elements_to_map, create_map, fetch_map_data, render_png
+from map_utils import (
+    MAP_HEIGHT,
+    MAP_WIDTH,
+    MapDataError,
+    add_layers_to_map,
+    create_map,
+    get_layers,
+    render_png,
+)
 
 DATA_FILE = Path(__file__).parent / "data" / "worldcities.csv"
 
@@ -100,39 +108,41 @@ def run():
 
     st.write("")
 
-    try:
-        with st.spinner("OpenStreetMap…"):
-            data = fetch_map_data(city_lat, city_lng)
-    except MapDataError as exc:
-        st.error(str(exc))
-        st.stop()
-
     colors = {
         "waterways": waterways_color,
         "coastline": coastline_color,
         "trunk": roads_color,
+        "motorway": roads_color,
+        "primary": roads_color,
         "tree": tree_color,
     }
-    options = {
-        "waterways_on": waterways_on,
-        "coastline_on": coastline_on,
-        "trunk_on": trunk_on,
-        "motorway_on": motorway_on,
-        "primary_on": primary_on,
-        "tree_on": tree_on,
+    enabled = {
+        "waterways": waterways_on,
+        "coastline": coastline_on,
+        "trunk": trunk_on,
+        "motorway": motorway_on,
+        "primary": primary_on,
+        "tree": tree_on,
     }
+    layers = [name for name, on in enabled.items() if on]
+
+    try:
+        with st.spinner("OpenStreetMap…"):
+            layers_data = get_layers(city_lat, city_lng, layers)
+    except MapDataError as exc:
+        st.error(str(exc))
+        st.stop()
 
     m = create_map(city_lat, city_lng)
-    m = add_elements_to_map(data, m, colors, options)
-    st_folium(m, width=700, height=600, returned_objects=[], key="map")
-
-    png = render_png(data, city_lat, city_lng, colors, options)
+    add_layers_to_map(m, layers_data, colors, city_lat, city_lng)
+    st_folium(m, width=MAP_WIDTH, height=MAP_HEIGHT, returned_objects=[], key="map")
 
     _, col_don, _ = st.columns([0.1, 0.8, 0.1])
     with col_don:
         st.download_button(
             label="Download PNG",
-            data=png,
+            data=lambda: render_png(layers_data, city_lat, colors),
+            on_click="ignore",
             file_name=f"{normalize(city['city_ascii'])}_map.png",
             mime="image/png",
         )
