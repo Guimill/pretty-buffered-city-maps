@@ -51,7 +51,7 @@ Haies_Dictionnary = {
     "Chinese" : "树篱",
     "Italian" : "Siepi",
     "Spanish" : "Senderos",
-    "Breton"  : ""
+    "Breton"  : "Kleuzioù"
 }
 
 Cours_d_eaux_Dictionnary = {
@@ -70,4 +70,13 @@ Littoral_Dictionnary = {
     "Italian" : "Costa",
     "Spanish" : "Costa",
     "Breton"  : "Arvor"
+}
+
+Introuvable_Dictionnary = {
+    "French"  : "Ville introuvable",
+    "English" : "City not found",
+    "Chinese" : "找不到该城市",
+    "Italian" : "Città non trovata",
+    "Spanish" : "Ciudad no encontrada",
+    "Breton"  : "N'eo ket bet kavet ar gêr"
 }
