@@ -1,0 +1,9 @@
+.git
+.devcontainer
+.cache
+.streamlit
+__pycache__
+*.pyc
+deploy
+Dockerfile
+compose.yaml

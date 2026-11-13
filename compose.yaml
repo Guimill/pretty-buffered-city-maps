@@ -1,0 +1,16 @@
+# City maps (Streamlit), behind Nginx Proxy Manager: forward to http://citymaps:8501 with Websockets ON
+name: citymaps
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - osm-cache:/app/.cache   # downloaded OSM layers, kept across updates
+    networks:
+      mynetwork:
+        aliases: [citymaps]
+volumes:
+  osm-cache:
+networks:
+  mynetwork:
+    external: true
