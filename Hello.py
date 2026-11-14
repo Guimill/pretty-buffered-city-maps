@@ -150,7 +150,7 @@ def run():
 
     with preview:
         try:
-            with st.spinner("OpenStreetMap…"):
+            with st.spinner("OpenStreetMap… (~1 min)"):
                 png = map_png(city_lat, city_lng, tuple(layers),
                               tuple(sorted(colors.items())), tuple(sorted(widths.items())))
         except MapDataError as exc:

@@ -11,6 +11,8 @@ import gzip
 import io
 import json
 import math
+import time
+from collections import deque
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
 
@@ -50,10 +52,13 @@ LAYERS = {
 
 # Overpass rejects requests sent with the default "python-requests" User-Agent
 # (HTTP 406), so we identify the app explicitly and try several mirrors.
+# overpass-api.de balances between two backends (z and lz4); when one is down,
+# half the requests fail at once, so "z" is also asked directly.
 OVERPASS_URLS = [
+    "https://z.overpass-api.de/api/interpreter",
     "https://overpass-api.de/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
     "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
 ]
 HEADERS = {"User-Agent": "pretty-buffered-city-maps/2.1 (Streamlit app)"}
 
@@ -138,8 +143,11 @@ def _cache_put(layer, lat, lng, lines):
 # --------------------------------------------------------------------------- #
 # Overpass
 # --------------------------------------------------------------------------- #
-HEDGE_DELAY_S = 12  # wait this long for a mirror before also asking the next one
+HEDGE_DELAY_S = 12      # wait this long for a mirror before also asking the next one
 REQUEST_TIMEOUT_S = 150
+TOTAL_BUDGET_S = 180    # give up after this long
+MAX_ATTEMPTS = 3        # per mirror
+RETRY_DELAY_S = 4       # x attempt number: overloaded mirrors often answer on the next try
 
 
 def _post(url, query):
@@ -152,29 +160,69 @@ def _post(url, query):
     return data
 
 
+def _retryable(exc):
+    """Busy/overloaded answers (429, 5xx, refused connection) are worth another try;
+    a request that already ran into the read timeout is not."""
+    if isinstance(exc, requests.Timeout):
+        return False
+    if isinstance(exc, requests.HTTPError) and exc.response is not None:
+        return exc.response.status_code in (429, 500, 502, 503, 504)
+    return True
+
+
 def _overpass(query):
-    """Hedged request: start with the first mirror, add the next one every
-    HEDGE_DELAY_S seconds (or as soon as one fails), return the first success."""
+    """Hedged request with retries.
+
+    Start with the first mirror and add the next one every HEDGE_DELAY_S seconds,
+    or at once when nothing is running. A mirror that fails with a "busy" error
+    is asked again a little later (up to MAX_ATTEMPTS). The first success wins.
+    """
+    deadline = time.monotonic() + TOTAL_BUDGET_S
     errors = []
+    attempts = dict.fromkeys(OVERPASS_URLS, 0)
+    ready = deque(OVERPASS_URLS)  # mirrors that can be asked now
+    retry_at = {}                 # mirror -> when it can be asked again
+    pending = {}                  # future -> mirror
+    last_start = float("-inf")
     pool = ThreadPoolExecutor(max_workers=len(OVERPASS_URLS))
-    pending = {}
-    urls = iter(OVERPASS_URLS)
     try:
-        while True:
-            url = next(urls, None)
-            if url is not None:
+        while time.monotonic() < deadline:
+            now = time.monotonic()
+            for url, when in list(retry_at.items()):
+                if when <= now:
+                    ready.append(url)
+                    del retry_at[url]
+            if ready and (not pending or now - last_start >= HEDGE_DELAY_S):
+                url = ready.popleft()
+                attempts[url] += 1
                 pending[pool.submit(_post, url, query)] = url
-            if not pending:
+                last_start = now
+            if not (pending or ready or retry_at):
                 break
-            done, _ = wait(pending, timeout=HEDGE_DELAY_S if url else None, return_when=FIRST_COMPLETED)
+
+            wake = [deadline]
+            if ready:
+                wake.append(last_start + HEDGE_DELAY_S)
+            if retry_at:
+                wake.append(min(retry_at.values()))
+            timeout = max(0.0, min(wake) - time.monotonic())
+            if pending:
+                done, _ = wait(pending, timeout=timeout, return_when=FIRST_COMPLETED)
+            else:
+                time.sleep(timeout)
+                done = ()
             for future in done:
-                failed_url = pending.pop(future)
+                url = pending.pop(future)
                 try:
                     return future.result()
                 except (requests.RequestException, ValueError) as exc:
-                    errors.append(f"{failed_url}: {exc}")
+                    errors.append(f"{url} (try {attempts[url]}): {exc}")
+                    if attempts[url] < MAX_ATTEMPTS and _retryable(exc):
+                        retry_at[url] = time.monotonic() + RETRY_DELAY_S * attempts[url]
     finally:
         pool.shutdown(wait=False, cancel_futures=True)
+    if pending:
+        errors.append("no answer in time from: " + ", ".join(pending.values()))
     raise MapDataError("Overpass API unavailable:\n" + "\n".join(errors))
 
 
