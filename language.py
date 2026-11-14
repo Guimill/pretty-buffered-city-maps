@@ -80,3 +80,12 @@ Introuvable_Dictionnary = {
     "Spanish" : "Ciudad no encontrada",
     "Breton"  : "N'eo ket bet kavet ar gêr"
 }
+
+Epaisseur_Dictionnary = {
+    "French"  : "Épaisseur",
+    "English" : "Width",
+    "Chinese" : "线宽",
+    "Italian" : "Spessore",
+    "Spanish" : "Grosor",
+    "Breton"  : "Tevder"
+}

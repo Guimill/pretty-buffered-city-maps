@@ -14,7 +14,6 @@ import math
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
 
-import folium
 import matplotlib
 
 matplotlib.use("Agg")  # headless backend, no display needed
@@ -27,12 +26,13 @@ from shapely.geometry import LineString, Point
 BACKGROUND_COLOR = "#0e1117"
 RING_COLOR = "white"
 
-# Folium map settings. CircleMarker radii are in screen pixels, so the visible
-# area depends on the zoom level.
+# The visible area: a disc of 250 px at Web Mercator zoom 10 (~30 km across).
+# Changing these changes the area downloaded from OpenStreetMap (bump CACHE_VERSION).
 ZOOM = 10
-OUTER_RADIUS_PX = 500
-INNER_RADIUS_PX = OUTER_RADIUS_PX - 250
-MAP_WIDTH, MAP_HEIGHT = 700, 600
+INNER_RADIUS_PX = 250
+
+# Default line width (matplotlib points on the 1200 px image)
+DEFAULT_LINE_WIDTH = 1.2
 
 # Lines are simplified with this tolerance (metres): ~1/6 of a screen pixel at
 # zoom 10, invisible on the map and on the PNG, but it removes most points.
@@ -88,11 +88,6 @@ def _bbox(lat, lng):
     r = disc_radius_m(lat) * 1.02
     k_lat, k_lng = _scales(lat)
     return (lat - r / k_lat, lng - r / k_lng, lat + r / k_lat, lng + r / k_lng)
-
-
-def _lines_to_latlng(lines, lat, lng):
-    k_lat, k_lng = _scales(lat)
-    return [[(lat + y / k_lat, lng + x / k_lng) for x, y in line] for line in lines]
 
 
 def _clip_and_simplify(geometry, lat, lng, disc):
@@ -223,47 +218,14 @@ def get_layers(lat, lng, layers):
 # --------------------------------------------------------------------------- #
 # Rendering
 # --------------------------------------------------------------------------- #
-def create_map(city_lat, city_lng, radius=OUTER_RADIUS_PX):
-    # No base tiles: the white circle covers the whole map anyway, so loading
-    # OSM tiles would only slow the page down.
-    m = folium.Map(
-        location=[city_lat, city_lng],
-        zoom_start=ZOOM,
-        tiles=None,
-        zoom_control=False,
-        dragging=False,
-        scrollWheelZoom=False,
-        doubleClickZoom=False,
-        touchZoom=False,
-        keyboard=False,
-    )
-    folium.CircleMarker(
-        location=[city_lat, city_lng], radius=radius, color=RING_COLOR,
-        stroke=False, fill=True, fill_opacity=1,
-    ).add_to(m)
-    folium.CircleMarker(
-        location=[city_lat, city_lng], radius=radius - 250, color=BACKGROUND_COLOR,
-        stroke=False, fill=True, fill_opacity=1,
-    ).add_to(m)
-    return m
+def render_png(layers_data, city_lat, colors, widths=None, size_px=1200):
+    """Render the circular map as a PNG with matplotlib (no browser needed).
 
-
-def add_layers_to_map(m, layers_data, colors, city_lat, city_lng):
-    # One multi-polyline per layer instead of one object per OSM way.
-    for layer, lines in layers_data.items():
-        if lines:
-            folium.PolyLine(
-                locations=_lines_to_latlng(lines, city_lat, city_lng),
-                color=colors[layer],
-                weight=2,
-            ).add_to(m)
-    return m
-
-
-def render_png(layers_data, city_lat, colors, size_px=1200):
-    """Render the circular map as a PNG with matplotlib (no browser needed)."""
+    The same image is shown in the page and downloaded, so the preview is exact.
+    widths: {layer: line width in points}, missing layers use DEFAULT_LINE_WIDTH.
+    """
+    widths = widths or {}
     inner_r = disc_radius_m(city_lat)
-    outer_r = OUTER_RADIUS_PX * meters_per_pixel(city_lat)
     frame_r = inner_r * 1.12  # white ring around the dark disc
 
     dpi = 200
@@ -275,12 +237,15 @@ def render_png(layers_data, city_lat, colors, size_px=1200):
     ax.axis("off")
     fig.patch.set_facecolor(RING_COLOR)
 
-    ax.add_patch(Circle((0, 0), outer_r, color=RING_COLOR, zorder=0))
-    ax.add_patch(Circle((0, 0), inner_r, color=BACKGROUND_COLOR, zorder=1))
+    disc = ax.add_patch(Circle((0, 0), inner_r, color=BACKGROUND_COLOR, zorder=1))
 
     for layer, lines in layers_data.items():
         if lines:
-            ax.add_collection(LineCollection(lines, colors=colors[layer], linewidths=1.2, zorder=2))
+            collection = ax.add_collection(LineCollection(
+                lines, colors=colors[layer], linewidths=widths.get(layer, DEFAULT_LINE_WIDTH),
+                capstyle="round", joinstyle="round", zorder=2,
+            ))
+            collection.set_clip_path(disc)  # thick lines stay inside the disc
 
     buffer = io.BytesIO()
     fig.savefig(buffer, format="png", dpi=dpi, facecolor=fig.get_facecolor())
